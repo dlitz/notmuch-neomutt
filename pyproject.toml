@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = 'notmuch-neomutt'
+description = 'Convenience tool for running neomutt with a notmuch search query'
+requires-python = ">= 3"
+dynamic = ["version"]
+
+[project.scripts]
+notmuch-neomutt = "notmuch_neomutt:main"
