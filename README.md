@@ -9,7 +9,16 @@ neomutt command-line.
 
 ## Installation
 
-    pip install git+https://github.com/dlitz/notmuch-neomutt
+```sh
+pip install git+https://github.com/dlitz/notmuch-neomutt
+```
+
+### Building from source
+
+```sh
+git clone https://github.com/dlitz/notmuch-neomutt
+python3 -m build ./notmuch-neomutt
+```
 
 ## Usage
 
