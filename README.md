@@ -1,20 +1,25 @@
 notmuch-neomutt
 ===============
 
-Convenience tool for searching email with [Notmuch][] and displaying the
-results using [NeoMutt][].
+A command-line helper script for viewing the results of a [Notmuch][] search
+using [NeoMutt][].
+
+It works by constructing a [notmuch:// URL][] and then passing it on the
+neomutt command-line.
+
+## Usage
 
 Usage is similar to [notmuch-search(1)][].
 
+<!-- generated using 'COLUMNS=80 notmuch-neomutt --help' -->
 ```
 usage: notmuch-neomutt [-h] [--showcmd | --showurl | --showquery] [-R] [+R]
-                       [--limit number] [-t {default,messages,m,threads,t}]
+                       [--limit number] [-t {messages,m,threads,t}]
                        [--query {infix,sexp}] [--neomutt-exe path]
                        [--neomutt-help] [--neomutt-args ...]
                        [search-term ...]
 
-Construct a notmuch:// URL from a notmuch-search(1) query, then open it with
-neomutt.
+Launch neomutt(1) to view the results of a notmuch-search(1) query.
 
 positional arguments:
   search-term
@@ -27,7 +32,7 @@ options:
   -R, --read-only       open mailbox in read-only mode
   +R, --read-write      open mailbox in read-write mode
   --limit number        restricts the number of messages/threads in the result
-  -t {default,messages,m,threads,t}, --type {default,messages,m,threads,t}
+  -t {messages,m,threads,t}, --type {messages,m,threads,t}
                         reads only matching messages, or whole threads
                         (default: use NeoMutt configuration)
   --query {infix,sexp}  notmuch query type (default: infix)

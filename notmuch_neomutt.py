@@ -25,8 +25,7 @@ def get_default_neomutt_exe():
 
 def parse_args(parser):
     parser.description = """
-    Construct a notmuch:// URL from a notmuch-search(1) query, then open it
-    with neomutt.
+    Launch neomutt(1) to view the results of a notmuch-search(1) query.
     """
     parser.allow_abbrev = False
     parser.prefix_chars = "-+"
