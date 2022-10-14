@@ -124,10 +124,6 @@ def get_notmuch_mail_root():
     mail_root = get_notmuch_config(setting)
     # database.mail_root is resolved relative to the user's home directory
     mail_root_path = Path("~").expanduser() / mail_root
-    if not mail_root_path.exists():
-        raise ConfigurationError(f"{setting} not found: {mail_root_path}")
-    elif not mail_root_path.is_dir():
-        raise ConfigurationError(f"{setting} not a directory: {mail_root_path}")
     return mail_root_path
 
 
