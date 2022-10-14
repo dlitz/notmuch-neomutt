@@ -32,6 +32,7 @@ def parse_args(parser):
     g = parser.add_mutually_exclusive_group()
     g.add_argument("--showcmd", action="store_true", help="show the command only")
     g.add_argument("--showurl", action="store_true", help="show the mailbox URL only")
+    g.add_argument("--showurl-strict", action="store_true", help="show the mailbox URL only (strict URL-encoding)")
     g.add_argument("--showquery", action="store_true", help="show the query only")
     parser.add_argument(
         "-R",
@@ -142,8 +143,16 @@ def showcmd(cmd):
     print(shlex.join(cmd))
 
 
-def query_urlencode(dict_):
-    return urlencode(dict_, quote_via=urlquote)
+def query_urlencode(dict_, *, strict=False):
+    if strict:
+        # These should be safe anywhere
+        safe = ''
+    else:
+        # These are safe to pass directly to neomutt, but might not be what you
+        # want elsewhere and might technically violate URI syntax.
+        # Doing this makes the mailbox URI more readable inside neomutt.
+        safe = ':"()\x20'
+    return urlencode(dict_, safe=safe, quote_via=urlquote)
 
 
 def main():
@@ -181,10 +190,10 @@ def main():
             qs['limit'] = args.limit
         u = urlsplit("notmuch:///")
         u = u._replace(path="//" + urlquote(str(mail_root)))
-        u = u._replace(query=query_urlencode(qs))
+        u = u._replace(query=query_urlencode(qs, strict=args.showurl_strict))
         mailbox_url = u.geturl()
 
-        if args.showurl:
+        if args.showurl or args.showurl_strict:
             print(mailbox_url)
             return
 

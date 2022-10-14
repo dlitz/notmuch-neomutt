@@ -18,8 +18,9 @@ Usage is similar to [notmuch-search(1)][].
 
 `$ notmuch-neomutt --help`
 ```
-usage: notmuch-neomutt [-h] [--showcmd | --showurl | --showquery] [-R] [+R]
-                       [--limit number] [-t {messages,m,threads,t}]
+usage: notmuch-neomutt [-h]
+                       [--showcmd | --showurl | --showurl-strict | --showquery]
+                       [-R] [+R] [--limit number] [-t {messages,m,threads,t}]
                        [--query {infix,sexp}] [--neomutt-exe path]
                        [--neomutt-help] [--neomutt-args ...]
                        [search-term ...]
@@ -33,6 +34,7 @@ options:
   -h, --help            show this help message and exit
   --showcmd             show the command only
   --showurl             show the mailbox URL only
+  --showurl-strict      show the mailbox URL only (strict URL-encoding)
   --showquery           show the query only
   -R, --read-only       open mailbox in read-only mode
   +R, --read-write      open mailbox in read-write mode
@@ -57,12 +59,19 @@ Omit `--showcmd` to open neomutt instead of displaying the command.
 
 `$ notmuch neomutt --showcmd 'subject:"Test message"'`
 ```
-neomutt -f 'notmuch:///home/user/Maildir?query=subject%3A%22Test%20message%22'
+neomutt -f 'notmuch:///home/user/Maildir?query=subject:"Test message"'
 ```
 
 #### Showing just the URL:
 
 `$ notmuch neomutt --showurl 'subject:"Test message"' --limit 100 -tt`
+```
+notmuch:///home/user/Maildir?query=subject:"Test message"&type=threads&limit=100
+```
+
+#### Showing just the URL (strict URI syntax):
+
+`$ notmuch neomutt --showurl-strict 'subject:"Test message"' --limit 100 -tt`
 ```
 notmuch:///home/user/Maildir?query=subject%3A%22Test%20message%22&type=threads&limit=100
 ```
@@ -71,21 +80,21 @@ notmuch:///home/user/Maildir?query=subject%3A%22Test%20message%22&type=threads&l
 
 `$ notmuch neomutt --showcmd --query=sexp '(and (from test@example.com) (subject "Test message"))'`
 ```
-neomutt -f 'notmuch:///home/user/Maildir?query=sexp%3A%22%28and%20%28from%20test%40example.com%29%20%28subject%20%22%22Test%20message%22%22%29%29%22'
+neomutt -f 'notmuch:///home/user/Maildir?query=sexp:"(and (from test%40example.com) (subject ""Test message""))"'
 ```
 
 #### Read-only mode:
 
 `$ notmuch neomutt --showcmd -R 'subject:"Test message"'`
 ```
-neomutt -R -f 'notmuch:///home/user/Maildir?query=subject%3A%22Test%20message%22'
+neomutt -R -f 'notmuch:///home/user/Maildir?query=subject:"Test message"'
 ```
 
 #### Configuring read-only mode by default:
 
 `$ notmuch config set neomutt.read_only true; notmuch neomutt --showcmd 'subject:"Test message"'`
 ```
-neomutt -R -f 'notmuch:///home/user/Maildir?query=subject%3A%22Test%20message%22'
+neomutt -R -f 'notmuch:///home/user/Maildir?query=subject:"Test message"'
 ```
 
 #### Read-write mode when configured read-only by default:
@@ -93,7 +102,7 @@ neomutt -R -f 'notmuch:///home/user/Maildir?query=subject%3A%22Test%20message%22
 `$ notmuch config get neomutt.read_only ; notmuch neomutt --showcmd +R 'subject:"Test message"'`
 ```
 true
-neomutt -f 'notmuch:///home/user/Maildir?query=subject%3A%22Test%20message%22'
+neomutt -f 'notmuch:///home/user/Maildir?query=subject:"Test message"'
 ```
 
 ## See also
