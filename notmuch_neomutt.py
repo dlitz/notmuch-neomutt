@@ -19,8 +19,15 @@ class ConfigurationError(Exception):
     "raised on configuration error (message will be shown without backtrace)"
 
 
+def get_default_neomutt_exe():
+    return os.environ.get("NOTMUCH_NEOMUTT_EXE", "neomutt")
+
+
 def parse_args(parser):
-    parser.description = "Open neomutt to a notmuch query"
+    parser.description = """
+    Construct a notmuch:// URL from a notmuch-search(1) query, then open it
+    with neomutt.
+    """
     parser.allow_abbrev = False
     parser.prefix_chars = "-+"
     g = parser.add_mutually_exclusive_group()
@@ -43,15 +50,35 @@ def parse_args(parser):
         help="open mailbox in read-write mode",
     )
     parser.add_argument(
+        "--limit",
+        metavar="number",
+        type=int,
+        help="restricts the number of messages/threads in the result",
+    )
+    parser.add_argument(
+        "-t",
+        "--type",
+        choices=("messages", "m", "threads", "t"),
+        default=None,
+        help="""
+            reads only matching messages, or whole threads (default: use
+            NeoMutt configuration)
+        """,
+    )
+    parser.add_argument(
         "--query",
         dest="query_type",
         choices=("infix", "sexp"),
         default="infix",
-        help="notmuch query type",
+        help="notmuch query type (default: %(default)s)",
     )
     parser.add_argument("search_terms", metavar="search-term", nargs="*")
     parser.add_argument(
-        "--neomutt-exe", default="neomutt", help="neomutt executable to invoke"
+        "--neomutt-exe",
+        metavar="path",
+        default=get_default_neomutt_exe(),
+        help="""neomutt executable to invoke (default: 'neomutt', or value of
+        the NOTMUCH_NEOMUTT_EXE environment variable)""",
     )
     parser.add_argument("--neomutt-help", action="store_true", help="show neomutt help")
     parser.add_argument(
@@ -62,8 +89,14 @@ def parse_args(parser):
         help="remaining arguments to be passed to neomutt",
     )
 
+    parser.epilog = """
+    Read-only mode configurable via
+    `notmuch config set neomutt.read_only true`.
+    """
+
     args, remaining_args = parser.parse_known_args()
     args.neomutt_args += remaining_args
+    args.type = {'m': 'messages', 't': 'threads', None: None}[args.type]
     if args.read_only is None:
         args.read_only = get_notmuch_config_bool("neomutt.read_only")
     return args
@@ -114,6 +147,10 @@ def showcmd(cmd):
     print(shlex.join(cmd))
 
 
+def query_urlencode(dict_):
+    return urlencode(dict_, quote_via=urlquote)
+
+
 def main():
     parser = ArgumentParser()
     try:
@@ -142,9 +179,14 @@ def main():
 
         # Construct the mailbox URL
         mail_root = get_notmuch_mail_root()
+        qs = {'query': query}
+        if args.type is not None:
+            qs['type'] = args.type
+        if args.limit is not None:
+            qs['limit'] = args.limit
         u = urlsplit("notmuch:///")
         u = u._replace(path="//" + urlquote(str(mail_root)))
-        u = u._replace(query=urlencode({"query": query}, quote_via=urlquote))
+        u = u._replace(query=query_urlencode(qs))
         mailbox_url = u.geturl()
 
         if args.showurl:
