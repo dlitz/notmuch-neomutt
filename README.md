@@ -1,4 +1,3 @@
-<!-- Code blocks generated using 'update-readme.sh' -->
 notmuch-neomutt
 ===============
 
@@ -16,8 +15,8 @@ neomutt command-line.
 
 Usage is similar to [notmuch-search(1)][].
 
-`$ notmuch-neomutt --help`
-```
+```console
+$ notmuch-neomutt --help
 usage: notmuch-neomutt [-h]
                        [--showcmd | --showurl | --showurl-strict | --showquery]
                        [-R] [+R] [--limit number] [-t {messages,m,threads,t}]
@@ -57,51 +56,53 @@ Omit `--showcmd` to open neomutt instead of displaying the command.
 
 #### Showing the command:
 
-`$ notmuch neomutt --showcmd 'subject:"Test message"'`
-```
+```console
+$ notmuch neomutt --showcmd 'subject:"Test message"'
 neomutt -f 'notmuch:///home/user/Maildir?query=subject:"Test message"'
 ```
 
 #### Showing just the URL:
 
-`$ notmuch neomutt --showurl 'subject:"Test message"' --limit 100 -tt`
-```
+```console
+$ notmuch neomutt --showurl 'subject:"Test message"' --limit 100 -tt
 notmuch:///home/user/Maildir?query=subject:"Test message"&type=threads&limit=100
 ```
 
 #### Showing just the URL (strict URI syntax):
 
-`$ notmuch neomutt --showurl-strict 'subject:"Test message"' --limit 100 -tt`
-```
+```console
+$ notmuch neomutt --showurl-strict 'subject:"Test message"' --limit 100 -tt
 notmuch:///home/user/Maildir?query=subject%3A%22Test%20message%22&type=threads&limit=100
 ```
 
 #### S-expression queries (see [notmuch-sexp-queries(7)][]):
 
-`$ notmuch neomutt --showcmd --query=sexp '(and (from test@example.com) (subject "Test message"))'`
 ```
+$ notmuch neomutt --showcmd --query=sexp '(and (from test@example.com) (subject "Test message"))'
 neomutt -f 'notmuch:///home/user/Maildir?query=sexp:"(and (from test%40example.com) (subject ""Test message""))"'
 ```
 
 #### Read-only mode:
 
-`$ notmuch neomutt --showcmd -R 'subject:"Test message"'`
-```
+```console
+$ notmuch neomutt --showcmd -R 'subject:"Test message"'
 neomutt -R -f 'notmuch:///home/user/Maildir?query=subject:"Test message"'
 ```
 
 #### Configuring read-only mode by default:
 
-`$ notmuch config set neomutt.read_only true; notmuch neomutt --showcmd 'subject:"Test message"'`
 ```
+$ notmuch config set neomutt.read_only true; notmuch neomutt --showcmd 'subject:"Test message"'
 neomutt -R -f 'notmuch:///home/user/Maildir?query=subject:"Test message"'
 ```
 
 #### Read-write mode when configured read-only by default:
 
-`$ notmuch config get neomutt.read_only ; notmuch neomutt --showcmd +R 'subject:"Test message"'`
 ```
+$ notmuch config get neomutt.read_only
 true
+
+$ notmuch neomutt --showcmd +R 'subject:"Test message"'
 neomutt -f 'notmuch:///home/user/Maildir?query=subject:"Test message"'
 ```
 
@@ -113,33 +114,6 @@ neomutt -f 'notmuch:///home/user/Maildir?query=subject:"Test message"'
 * [notmuch-search manpage][notmuch-search(1)]
 * [notmuch-search-terms manpage][notmuch-search-terms(7)]
 * [notmuch s-expression queries manpage][notmuch-sexp-queries(7)]
-
-## License
-
-[> LICENSE](LICENSE)
-<!-- BEGIN mdsh -->
-MIT License
-
-Copyright (c) 2022 Darsey Litzenberger
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-<!-- END mdsh -->
 
 <!-- References -->
 
