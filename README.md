@@ -77,7 +77,7 @@ notmuch:///home/user/Maildir?query=subject%3A%22Test%20message%22&type=threads&l
 
 #### S-expression queries (see [notmuch-sexp-queries(7)][]):
 
-```
+```console
 $ notmuch neomutt --showcmd --query=sexp '(and (from test@example.com) (subject "Test message"))'
 neomutt -f 'notmuch:///home/user/Maildir?query=sexp:"(and (from test%40example.com) (subject ""Test message""))"'
 ```
@@ -91,14 +91,14 @@ neomutt -R -f 'notmuch:///home/user/Maildir?query=subject:"Test message"'
 
 #### Configuring read-only mode by default:
 
-```
+```console
 $ notmuch config set neomutt.read_only true; notmuch neomutt --showcmd 'subject:"Test message"'
 neomutt -R -f 'notmuch:///home/user/Maildir?query=subject:"Test message"'
 ```
 
 #### Read-write mode when configured read-only by default:
 
-```
+```console
 $ notmuch config get neomutt.read_only
 true
 
@@ -114,6 +114,10 @@ neomutt -f 'notmuch:///home/user/Maildir?query=subject:"Test message"'
 * [notmuch-search manpage][notmuch-search(1)]
 * [notmuch-search-terms manpage][notmuch-search-terms(7)]
 * [notmuch s-expression queries manpage][notmuch-sexp-queries(7)]
+
+## License
+
+[MIT License](LICENSE)
 
 <!-- References -->
 

@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+# dlitz 2022
+from argparse import ArgumentParser
+from io import StringIO
+from pathlib import Path
+from subprocess import run, check_output
+from tempfile import TemporaryDirectory
+import os
+import re
+import sys
+
+guarded_code_blocks_regex = re.compile(
+    r"""
+    (?P<before>
+        ^
+        ```console
+        [\t\x20]*
+        \n
+    )
+    (?P<content>.*?)
+    (?P<after>
+    ^
+    ```
+    [\t\x20]*
+    \n
+    )
+    """,
+    re.X | re.M | re.S,
+)
+
+dollar_line_regex = re.compile(
+    r"""
+    ^(?P<before>\n*)
+    ^
+    (?P<cmdline>
+        (?P<prompt>
+            ^\$\x20
+        )
+        (?P<command>[^\n]+)
+        \n
+    )
+    """,
+    re.X | re.M,
+)
+
+
+def open_arg(path, mode="r", *args, **kw):
+    if str(path) == "-":
+        if "r" in mode:
+            return open(sys.stdin.fileno(), mode, *args, closefd=False, **kw)
+        else:
+            return open(sys.stdout.fileno(), mode, *args, closefd=False, **kw)
+    return open(path, mode, *args, **kw)
+
+
+def parse_args():
+    parser = ArgumentParser(description="Refresh shell code in README")
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=Path("README.md"),
+        help="output file, default: %(default)s",
+    )
+    parser.add_argument(
+        "input",
+        nargs="?",
+        type=Path,
+        default=Path("README.md"),
+        help="input file, default: %(default)s",
+    )
+    args = parser.parse_args()
+    return args, parser
+
+
+def iter_block_content(block):
+    prev_pos = 0
+    def emit(type_, span, match):
+        nonlocal prev_type, prev_pos
+        ms, me = span
+        assert ms == prev_pos, (ms, pos)
+        yield (type_, span, match)
+        prev_pos = me
+        prev_type = type_
+
+    orig_block = block
+    block = block.rstrip('\n') + '\n'
+    block_trailing_whitespace = orig_block[len(block):]
+
+    prev_type = None
+    pos = 0
+    while pos < len(block):
+        m = dollar_line_regex.search(block, pos)
+        if not m:
+            # No more command lines.
+            assert prev_type != "head"
+            if prev_type == "cmdline":
+                type_ = "output"
+            else:
+                type_ = "tail"
+            yield from emit(type_, (pos, len(block)), None)
+            pos = len(block)
+            break
+        ms, me = m.span("before")
+        if pos < ms:
+            if pos == 0:
+                yield from emit("head", (pos, ms), m)
+            else:
+                assert prev_type == "cmdline"
+                yield from emit("output", (pos, ms), m)
+            pos = ms
+        ms, me = m.span("cmdline")  # match_start, match_end
+        if pos < ms:
+            yield from emit("head", (pos, ms), m)
+        yield from emit("cmdline", (ms, me), m)
+        pos = me
+
+    if block_trailing_whitespace:
+        yield from emit('tail', (pos, len(orig_block)), None)
+
+def refresh_block_content(block):
+    result = []
+    spans = []
+    for type_, span, match in iter_block_content(block):
+        ms, me = span
+        spans.append(span)
+        match type_:
+            case "head":
+                result.append(block[ms:me])
+            case "cmdline":
+                result.append(block[ms:me])
+                command = match["command"]
+                new_output = check_output(command, shell=True, text=True)
+                new_output = new_output.rstrip('\n') + '\n'
+                result.append(new_output)
+            case "output":
+                pass
+            case "tail":
+                result.append(block[ms:me])
+            case _:
+                raise AssertionError(type_)
+
+    # assert spans cover the whole string
+    pos = 0
+    for (ms, me) in spans:
+        assert pos == ms, (pos, ms)
+        pos = me
+    assert pos == len(block), (pos, len_block)
+
+    result = "".join(result)
+    assert result.endswith("\n")
+    return result
+
+
+def update_content(args):
+    with open_arg(args.input) as infile:
+        readme = infile.read()
+
+    def replace(block_match):
+        pos = block_match.start(0)
+        cs, ce = block_match.span('content')
+        content = block_match['content']
+        new_content = refresh_block_content(content)
+        old_block = block_match[0]
+        return old_block[:cs-pos] + new_content + old_block[ce-pos:]
+
+    new_output = guarded_code_blocks_regex.sub(replace, readme)
+    assert new_output.endswith('\n')
+
+    with open_arg(args.output, 'w') as outfile:
+        outfile.write(new_output)
+
+def main():
+    args, parser = parse_args()
+    with TemporaryDirectory() as tempdir:
+        tempdir = Path(tempdir)
+        config_path = tempdir / "config"
+        config_path.write_text("")
+        os.environ['NOTMUCH_CONFIG'] = str(config_path)
+        run(['notmuch', 'config', 'set', 'database.mail_root', '/home/user/Maildir'])
+        run(['notmuch', 'config', 'set', 'database.path', str(tempdir)])
+        update_content(args)
+
+if __name__ == "__main__":
+    main()
