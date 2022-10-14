@@ -4,9 +4,26 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = 'notmuch-neomutt'
-description = 'Convenience tool for running neomutt with a notmuch search query'
+description = 'Console script for viewing the results of a notmuch search using NeoMutt'
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["neomutt", "notmuch"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Communications :: Email :: Filters",
+]
 requires-python = ">= 3"
 dynamic = ["version"]
+
+[project.urls]
+repository = "https://github.com/dlitz/notmuch-neomutt"
+
+[[project.authors]]
+name = "Darsey Litzenberger"
+email = "dlitz@dlitz.net"
 
 [project.scripts]
 notmuch-neomutt = "notmuch_neomutt:main"
