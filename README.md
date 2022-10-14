@@ -7,6 +7,12 @@ using [NeoMutt][].
 It works by constructing a [notmuch:// URL][] and then passing it on the
 neomutt command-line.
 
+## Installation
+
+```bash
+pip install git+https://github.com/dlitz/notmuch-neomutt
+```
+
 ## Usage
 
 Usage is similar to [notmuch-search(1)][].
